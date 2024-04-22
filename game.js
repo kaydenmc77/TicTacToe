@@ -5,17 +5,14 @@
 //TODO - Display the correct winner
 //TODO - Allow player input
 
-// Variables
+//SECTION Variables
 const emptyCell = 0
 const nought = 1
 const cross = 2
 
-var activeCounter = 0
-
 var turnCount = 0
 
-var coordinates = [];
-var position = 0
+var isGameOver = false
 
 // Game grid will be a single array of 9 numbers sectioned in 3s
 // The first entry (index 0) will be the top left corner of the grid, the 5th will be the center etc
@@ -87,12 +84,186 @@ function displayGameGrid(gameGrid = Array) {
 
 function counterDecider(turnCount) {
     const isEven = num => num % 2 === 0;
+    let activeCounter = 0
 
     if(isEven(turnCount)) {
         activeCounter = 2
     }
     else{
         activeCounter = 1
+    }
+    return activeCounter
+}
+
+function updateGameGrid(x, y) {
+    let activeCounter = counterDecider(turnCount)
+    let positionToChange = findGridPosition(x, y)
+
+    gameGrid[positionToChange] = activeCounter;
+    displayGameGrid(gameGrid)
+}
+
+function gridAssessmentCheck(gameGrid = Array) {
+
+}
+
+//SECTION - Hard coded win checks
+
+function checkRow1() {
+    let array = []
+    array.push(gameGrid[0])
+    array.push(gameGrid[1])
+    array.push(gameGrid[2])
+
+    let activeCounter = counterDecider(turnCount)
+    let playerVictory = 0
+
+    if(array == [activeCounter, activeCounter, activeCounter]) {
+        playerVictory = 1
+    }
+    return playerVictory
+}
+function checkRow2() {
+    let array = []
+    array.push(gameGrid[3])
+    array.push(gameGrid[4])
+    array.push(gameGrid[5])
+
+    let activeCounter = counterDecider(turnCount)
+    let playerVictory = 0
+
+    if(array == [activeCounter, activeCounter, activeCounter]) {
+        playerVictory = 1
+    }
+    return playerVictory
+}
+function checkRow3() {
+    let array = []
+    array.push(gameGrid[6])
+    array.push(gameGrid[7])
+    array.push(gameGrid[8])
+
+    let activeCounter = counterDecider(turnCount)
+    let playerVictory = 0
+
+    if(array == [activeCounter, activeCounter, activeCounter]) {
+        playerVictory = 1
+    }
+    return playerVictory
+}
+function checkColumn1() {
+    let array = []
+    array.push(gameGrid[0])
+    array.push(gameGrid[3])
+    array.push(gameGrid[6])
+
+    let activeCounter = counterDecider(turnCount)
+    let playerVictory = 0
+
+    if(array == [activeCounter, activeCounter, activeCounter]) {
+        playerVictory = 1
+    }
+    return playerVictory
+}
+function checkColumn2() {
+    let array = []
+    array.push(gameGrid[1])
+    array.push(gameGrid[4])
+    array.push(gameGrid[7])
+
+    let activeCounter = counterDecider(turnCount)
+    let playerVictory = 0
+
+    if(array == [activeCounter, activeCounter, activeCounter]) {
+        playerVictory = 1
+    }
+    return playerVictory
+}
+function checkColumn3() {
+    let array = []
+    array.push(gameGrid[2])
+    array.push(gameGrid[5])
+    array.push(gameGrid[8])
+
+    let activeCounter = counterDecider(turnCount)
+    let playerVictory = 0
+
+    if(array == [activeCounter, activeCounter, activeCounter]) {
+        playerVictory = 1
+    }
+    return playerVictory
+}
+function checkDiagonalTopLeft() {
+    let array = []
+    array.push(gameGrid[0])
+    array.push(gameGrid[4])
+    array.push(gameGrid[8])
+
+    let activeCounter = counterDecider(turnCount)
+    let playerVictory = 0
+
+    if(array == [activeCounter, activeCounter, activeCounter]) {
+        playerVictory = 1
+    }
+    return playerVictory
+}
+function checkDiagonalTopRight() {
+    let array = []
+    array.push(gameGrid[2])
+    array.push(gameGrid[4])
+    array.push(gameGrid[6])
+
+    let activeCounter = counterDecider(turnCount)
+    let playerVictory = 0
+
+    if(array == [activeCounter, activeCounter, activeCounter]) {
+        playerVictory = 1
+    }
+    return playerVictory
+}
+
+//
+
+function checkForWin() {
+    let winCheckers = []
+    
+    winCheckers.push(checkRow1())
+    winCheckers.push(checkRow2())
+    winCheckers.push(checkRow3())
+    winCheckers.push(checkColumn1())
+    winCheckers.push(checkColumn2())
+    winCheckers.push(checkColumn3())
+    winCheckers.push(checkDiagonalTopLeft())
+    winCheckers.push(checkDiagonalTopRight())
+
+    for(let i = 0; i<winCheckers.length; i++) {
+        if(winCheckers[i] == 1) {
+            gameOver()
+        }
+    }
+}
+
+function playerInput() {
+
+}
+
+function gameOver() {
+    let gameWinner = counterDecider(turnCount)
+
+    isGameOver = true
+    console.log(`The winner is player ${gameWinner}`)
+}
+
+function playGame() {
+    displayGameGrid(gameGrid)
+    playerInput()
+    checkForWin()
+    turnCount++
+}
+
+function main() {
+    while(isGameOver = false) {
+        playGame()
     }
 }
 
