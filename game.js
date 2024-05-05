@@ -12,7 +12,7 @@ const emptyCell = 0
 const nought = 1
 const cross = 2
 
-var turnCount = 0
+var turnCount = 1
 
 var isGameOver = false
 
@@ -28,11 +28,11 @@ const rl = readline.createInterface({
 var gameGrid = [emptyCell, emptyCell, emptyCell, emptyCell, emptyCell, emptyCell, emptyCell, emptyCell, emptyCell];
 
 // Converts x and y coorindates into a single numbered position 
-function findGridPosition(x, y) {
+function findGridPosition(groupedCoordinates) {
     let position = 0;
 
-    let grouped = `${x}${y}`;
-    const input = parseInt(grouped, 10);
+    
+    const input = parseInt(groupedCoordinates, 10);
 
 
     switch (input) {
@@ -386,20 +386,29 @@ function getInputY() {
     });
 }
 
-async function playerInput() {
-    let result = [];
-    let activePlayer = counterDecider(turnCount)
-
-    console.log(`It is Player ${activePlayer}\'s turn`)
+async function enterCoordinates() {
+    let result = 0
     let x = await getInputX();
     let y = await getInputY();
 
-    console.log(`Your chosen position is ${x}, ${y}`)
-    console.log("")
-
-    result.push(x);
-    result.push(y);
+    let grouped = `${x}${y}`;
+    let gridPosition = findGridPosition(grouped);
+    if(gameGrid[gridPosition] !== 0) {
+        result = gridPosition;
+    }
+    else if(gameGrid[gridPosition] == 0) {
+        enterCoordinates()
+    }
     return result
+}
+
+async function playerInput() {
+    let activePlayer = counterDecider(turnCount)
+
+    console.log(`It is Player ${activePlayer}\'s turn`)
+
+    let groupedCoordinates = enterCoordinates();
+    return groupedCoordinates
 }
 
 function gameOver(playerVictory) {
@@ -418,11 +427,7 @@ async function playGame() {
         let coordinates = await playerInput();
         console.log("Input received");
 
-        let x = coordinates[0];
-        let y = coordinates[1];
-
-        
-        updateGameGrid(x, y);
+        updateGameGrid(coordinates);
         console.log("Game grid updated");
 
         let victoryState = checkForWin();
