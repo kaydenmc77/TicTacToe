@@ -1,11 +1,15 @@
 //NOTE - Make a TicTacToe game for 2 players that will be represented with a 2D grid.
 //TODO - Make an internal game grid
-//TODO -  Find a way to display the game grid
+//TODO - Find a way to display the game grid
 //TODO - Detect whether or not there are 3 of the same counters in a row
 //TODO - Display the correct winner
 //TODO - Allow player input
 
+//NOTE - Hello
+
 //NOTE - npm install readline-sync
+
+//FIXME
 
 //SECTION Variables
 const emptyCell = 0
@@ -79,6 +83,7 @@ function findGridPosition(groupedCoordinates) {
     return position
 }
 
+//FIXME Hard coded win checks, need helping working out modular version
 //SECTION - Hard coded win checks
 const winConditions = {
     checkRow1: 
@@ -298,6 +303,7 @@ const winConditions = {
 }
 //
 
+//FIXME Hard coded win conditions and checker function
 function checkForWin() {
     let playerVictory = 0;
     console.log("Player victory set")
@@ -346,6 +352,7 @@ function updateGameGrid(x, y) {
     gameGrid[positionToChange] = activeCounter;
 }
 
+//FIXME Getting user inputs and translating that to the grid
 function getInputX() {
     return new Promise(resolve => {
         rl.question('Enter your X coordinate: ', (answer) => {
@@ -386,12 +393,12 @@ function getInputY() {
     });
 }
 
+//FIXME Function to combine those coordinates and group them so I can use recursive functions but broken
 async function enterCoordinates() {
     let result = 0
     let x = await getInputX();
     let y = await getInputY();
 
-    let grouped = `${x}${y}`;
     let gridPosition = findGridPosition(grouped);
     if(gameGrid[gridPosition] !== 0) {
         result = gridPosition;
@@ -402,6 +409,7 @@ async function enterCoordinates() {
     return result
 }
 
+//FIXME Player input function
 async function playerInput() {
     let activePlayer = counterDecider(turnCount)
 
