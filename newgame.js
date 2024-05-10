@@ -14,6 +14,15 @@ let naught = 1
 let cross = 2
 
 let turn = 1
+let gameState = true
+
+// Import readline function
+const readline = require('node:readline')
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 
 let gameGrid = createGrid()
 //
@@ -54,8 +63,14 @@ function turnDecider() {
 
 function getUserInput() {
     // Include readline here for input
-    let x = 0
-    let y = 0
+    let x = rl.question('Enter your Y coordinate: ', (input) => {
+        // Converts string input to number for grid access
+        const numberInput = parseInt(input, 10);
+    })
+    let y = rl.question('Enter your X coordinate: ', (input) => {
+        // Converts string input to number for grid access
+        const numberInput = parseInt(input, 10);
+    })
 
     // Check if input is valid, if not, perform recursion
     let gridPositionValue = gameGrid[y][x]
@@ -63,6 +78,8 @@ function getUserInput() {
     if(gridPositionValue == 0) {
         console.log("This is a valid spot")
         gameGrid[y][x] = turnDecider()
+
+        displayGameGrid()
     }
     else if(gridPositionValue !== 0) {
         console.log("This spot is already taken")
@@ -80,17 +97,22 @@ function checkForDraw() {
 
 function playGame() {
     // Parent function to call every playable feature
-    displayGameGrid()
 
-    getUserInput()
+    // Hard chosen number of turns for testing
+    let numberOfTurns = 3
 
-    checkForWin()
-    
-    checkForDraw()
+    // Replace with while loop that checks if game is still going
+    // for(let i = 0; i<numberOfTurns; i++) {
+        displayGameGrid()
 
-    turn++
+        getUserInput()
 
+        checkForWin()
+
+        checkForDraw()
+
+        turn++
+    // } 
 }
 
-displayGameGrid()
-console.log(getUserInput())
+playGame()
