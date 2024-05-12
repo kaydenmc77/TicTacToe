@@ -16,13 +16,16 @@ let cross = 2
 let turn = 1
 let gameState = true
 
+const { get } = require('https')
+const { getuid } = require('process')
 // Import readline function
-const readline = require('node:readline')
+const readline = require('readline')
 
+//Create an interfacefor the input and output
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
-});
+})
 
 let gameGrid = createGrid()
 //
@@ -46,6 +49,7 @@ function createGrid() {
 
 function displayGameGrid() {
     gameGrid.forEach(v=>console.log(...v))
+    console.log("")
 }
 
 function turnDecider() {
@@ -61,58 +65,126 @@ function turnDecider() {
     return player
 }
 
+//NOTE - IT'S WORKING
 function getUserInput() {
+    let y = 0
+    let x = 0
+
     // Include readline here for input
-    let x = rl.question('Enter your Y coordinate: ', (input) => {
+    rl.question('Enter your Y coordinate: ', (inputY) => {
+        // Quick exit function for testing
+        if(inputY === 'end') { process.exit() }
         // Converts string input to number for grid access
-        const numberInput = parseInt(input, 10);
-    })
-    let y = rl.question('Enter your X coordinate: ', (input) => {
-        // Converts string input to number for grid access
-        const numberInput = parseInt(input, 10);
-    })
+        const numberInputY = parseInt(inputY, 10);
+        y = numberInputY-1
 
-    // Check if input is valid, if not, perform recursion
-    let gridPositionValue = gameGrid[y][x]
-    console.log(gridPositionValue)
-    if(gridPositionValue == 0) {
-        console.log("This is a valid spot")
-        gameGrid[y][x] = turnDecider()
+        if(y >= 0 && y <= 2) {
+            rl.question('Enter your X coordinate: ', (inputX) => {
+                // Quick exit function for testing
+                if(inputX === 'end') { process.exit() }
+                // Converts string input to number for grid access
+                const numberInputX = parseInt(inputX, 10);
+                x = numberInputX-1
 
-        displayGameGrid()
+                if(x >= 0 && x <= 2) {
+                    // Check if position is empty, if not, callback
+                    let gridPositionValue = gameGrid[y][x]
+                    if(gridPositionValue == 0) {
+                        // Sets position to the player's counter
+                        gameGrid[y][x] = turnDecider()
+
+                        console.log("")
+                        displayGameGrid()
+
+                        checkForWin()
+
+                        checkForDraw()
+
+                        rl.close();
+                    }
+                    else if(gridPositionValue !== 0) {
+                        console.log("This spot is already taken")
+                        getUserInput()
+                    }
+                }
+                else { getUserInput() }
+            });
+        }
+        else { getUserInput() }
+    });
+}
+
+function checkForRowColumn() {
+    // Checks rows
+    for(let gridY = 0; gridY<gameGrid.length; gridY++) {
+        for(let player = 1; player<2; player++) {
+            if(gameGrid[gridY][0] == player && gameGrid[gridY][1] == player && gameGrid[gridY][2] == player) {
+                declareWinner(player)
+            }
+        }
     }
-    else if(gridPositionValue !== 0) {
-        console.log("This spot is already taken")
-        getUserInput()
+    // Checks columns
+    for(let gridX = 0; gridX<gameGrid.length; gridX) {
+        for(let player = 1; player<2; player++) {
+            if(gameGrid[0][gridX] == player && gameGrid[1][gridX] == player && gameGrid[2][gridX] == player) {
+                declareWinner(player)
+            }
+        }
     }
+}   
+
+function checkForDiagonals(player) {
+    // Check top left to bottom right diagonal
+    let firstDiagonal = false;
+    for (let i = 0; i<gameGrid.length; i++) {
+        if(gameGrid[i][i] == player) {
+            firstDiagonal = true
+        }
+        else{ firstDiagonal = false }
+    }
+    // Check top left to bottom right diagonal
+    let secondDiagonal = false;
+    for (let i = 0; i<gameGrid.length; i++) {
+        if(gameGrid[i][gameGrid.length - 1 - i] == player) {
+            secondDiagonal = true
+        }
+        else{ secondDiagonal = false }
+    }
+
+    return firstDiagonal || secondDiagonal;
 }
 
 function checkForWin() {
-
+    checkForRowColumn()
+    for(let player = 1; player<2; player++) {
+        let result = checkForDiagonals(player)
+        if(result == true) {declareWinner(player)}
+    }
 }
 
 function checkForDraw() {
+    let gridFull = false
+    for(let gridY = 0; gridY<gameGrid.length; gridY++) {
+        if(gameGrid[gridY][0] !== 0 && gameGrid[gridY][1] !== 0 && gameGrid[gridY][2] !== 0) {
+            gridFull = true
+        }
+    }
+    if(gridFull === true) { declareWinner(0) }
+}
 
+function declareWinner(player) {
+    if(player === 0) { console.log(`This game is a draw`) }
+    else{ console.log(`Player ${player} has won`) }
+    process.exit()
 }
 
 function playGame() {
     // Parent function to call every playable feature
 
-    // Hard chosen number of turns for testing
-    let numberOfTurns = 3
-
     // Replace with while loop that checks if game is still going
-    // for(let i = 0; i<numberOfTurns; i++) {
-        displayGameGrid()
+    displayGameGrid()
 
-        getUserInput()
-
-        checkForWin()
-
-        checkForDraw()
-
-        turn++
-    // } 
+    getUserInput()
 }
 
 playGame()
