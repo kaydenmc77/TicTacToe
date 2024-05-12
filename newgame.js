@@ -8,18 +8,22 @@
 //TODO - Check for draw (grid full)
 //TODO - Display the game grid
 
+//NOTE - You must run: `npm install colors` in your terminal
+
 //SECTION - Variables
 let emptyPosition = 0
-let naught = 1
-let cross = 2
 
 let turn = 1
 let gameState = true
 
-const { get } = require('https')
-const { getuid } = require('process')
+let player1Colour = `\x1b[31m`
+let player2Colour = `\x1b[34m`
+
 // Import readline function
 const readline = require('readline')
+
+// Imports colours
+const colors = require('colors');
 
 //Create an interfacefor the input and output
 const rl = readline.createInterface({
@@ -47,9 +51,21 @@ function createGrid() {
     return gameGrid
 }
 
-function displayGameGrid() {
+function strippedDisplayOfGrid() {
     gameGrid.forEach(v=>console.log(...v))
     console.log("")
+}
+
+function displayGameGrid() {
+    console.log(`┏━━━┳━━━┳━━━┳━━━┓`)
+    console.log(`┃y/x┃ 1 ┃ 2 ┃ 3 ┃`)
+    console.log(`┣━━━╋━━━╋━━━╋━━━┫`)
+    console.log(`┃ 1 ┃ ${counterDecider(gameGrid[0][0])} ┃ ${counterDecider(gameGrid[0][1])} ┃ ${counterDecider(gameGrid[0][2])} ┃`)
+    console.log(`┣━━━╋━━━╋━━━╋━━━┫`)
+    console.log(`┃ 2 ┃ ${counterDecider(gameGrid[1][0])} ┃ ${counterDecider(gameGrid[1][1])} ┃ ${counterDecider(gameGrid[1][2])} ┃`)
+    console.log(`┣━━━╋━━━╋━━━╋━━━┫`)
+    console.log(`┃ 3 ┃ ${counterDecider(gameGrid[2][0])} ┃ ${counterDecider(gameGrid[2][1])} ┃ ${counterDecider(gameGrid[2][2])} ┃`)
+    console.log(`┗━━━┻━━━┻━━━┻━━━┛`)
 }
 
 function turnDecider() {
@@ -65,12 +81,22 @@ function turnDecider() {
     return player
 }
 
+function counterDecider(number) {
+    if(number == 0) { return ` `}
+    else if(number == 1) { return (`O`).blue}
+    else if(number == 2) { return (`X`).red}
+}
+
 //NOTE - IT'S WORKING
 function getUserInput() {
     let y = 0
     let x = 0
 
     // Include readline here for input
+    console.log("")
+    if(turnDecider() == 1) { console.log('It is Player 1\'s turn'.blue); }
+    else if(turnDecider() == 2) { console.log((`It is Player 2's turn`).red) }
+    
     rl.question('Enter your Y coordinate: ', (inputY) => {
         // Quick exit function for testing
         if(inputY === 'end') { process.exit() }
@@ -93,14 +119,15 @@ function getUserInput() {
                         // Sets position to the player's counter
                         gameGrid[y][x] = turnDecider()
 
-                        console.log("")
-                        displayGameGrid()
-
                         checkForWin()
 
                         checkForDraw()
 
-                        rl.close();
+                        console.log("")
+
+                        turn++
+                        if(gameState == true) { playGame() }
+                        else{ process.exit() }
                     }
                     else if(gridPositionValue !== 0) {
                         console.log("This spot is already taken")
@@ -117,17 +144,17 @@ function getUserInput() {
 function checkForRowColumn() {
     // Checks rows
     for(let gridY = 0; gridY<gameGrid.length; gridY++) {
-        for(let player = 1; player<2; player++) {
+        for(let player = 1; player<=2; player++) {
             if(gameGrid[gridY][0] == player && gameGrid[gridY][1] == player && gameGrid[gridY][2] == player) {
-                declareWinner(player)
+                declareWinner(player, `by going across row ${gridY+1}`)
             }
         }
     }
     // Checks columns
-    for(let gridX = 0; gridX<gameGrid.length; gridX) {
-        for(let player = 1; player<2; player++) {
+    for(let gridX = 0; gridX<gameGrid.length; gridX++) {
+        for(let player = 1; player<=2; player++) {
             if(gameGrid[0][gridX] == player && gameGrid[1][gridX] == player && gameGrid[2][gridX] == player) {
-                declareWinner(player)
+                declareWinner(player, `by going down column ${gridX+1}`)
             }
         }
     }
@@ -136,29 +163,34 @@ function checkForRowColumn() {
 function checkForDiagonals(player) {
     // Check top left to bottom right diagonal
     let firstDiagonal = false;
+    let firstDiagonalCount = 0;
     for (let i = 0; i<gameGrid.length; i++) {
         if(gameGrid[i][i] == player) {
-            firstDiagonal = true
+            firstDiagonalCount++
         }
-        else{ firstDiagonal = false }
     }
     // Check top left to bottom right diagonal
     let secondDiagonal = false;
+    let secondDiagonalCount = 0;
     for (let i = 0; i<gameGrid.length; i++) {
         if(gameGrid[i][gameGrid.length - 1 - i] == player) {
-            secondDiagonal = true
+            secondDiagonalCount++
         }
-        else{ secondDiagonal = false }
     }
 
-    return firstDiagonal || secondDiagonal;
+    if(firstDiagonalCount == 3) { firstDiagonal = true }
+    if(secondDiagonalCount == 3) { secondDiagonal = true }
+
+
+    return [firstDiagonal, secondDiagonal]
 }
 
 function checkForWin() {
     checkForRowColumn()
-    for(let player = 1; player<2; player++) {
+    for(let player = 1; player<=2; player++) {
         let result = checkForDiagonals(player)
-        if(result == true) {declareWinner(player)}
+        if(result[0] == true) {declareWinner(player, `by going from the top left to the bottom right`)}
+        if(result[1] == true) {declareWinner(player, `by going from the top right to the bottom left`)}
     }
 }
 
@@ -168,22 +200,22 @@ function checkForDraw() {
         if(gameGrid[gridY][0] !== 0 && gameGrid[gridY][1] !== 0 && gameGrid[gridY][2] !== 0) {
             gridFull = true
         }
+        else { gridFull = false }
     }
     if(gridFull === true) { declareWinner(0) }
 }
 
-function declareWinner(player) {
+function declareWinner(player, deciderfunction) {
+    console.log("")
     if(player === 0) { console.log(`This game is a draw`) }
-    else{ console.log(`Player ${player} has won`) }
-    process.exit()
+    else if(player === 1) { console.log(`Player 1 has won, ${deciderfunction}`.blue) }
+    else if(player === 2) { console.log(`Player 2 has won, ${deciderfunction}`.red) }
+    gameState = false
 }
 
 function playGame() {
     // Parent function to call every playable feature
-
-    // Replace with while loop that checks if game is still going
     displayGameGrid()
-
     getUserInput()
 }
 
